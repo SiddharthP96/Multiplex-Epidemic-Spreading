@@ -564,24 +564,37 @@ def LFR_het_deg(n=10000,t1=2,mu=0.025,average_k=4,max_k=10,community=100):
     return g, coms
 
 
-def MSBM_COMM_het_deg(t1,shuff=False):
+
+def MSBM_COMM_het_deg(N=10000,t1=2,corr=False,q=10):
+    #code to create multiplex SBM with q equal communities and heterogeneous degree distributions 
+    #create the networks
+    #the communities are chosen randomly, i.e., the resulting networks are completely uncorrelated
     g1,c1=LFR_het_deg(mu=0.025,t1=t1)
     g2,c2=LFR_het_deg(mu=0.025,t1=t1)
-    if shuff:
+    #nodes per community
+    C=int(N/q)
+    #to create networks with correlated communities
+    if corr:
+    #relabel the communities based on their community assignment
         relabel1={}
-        cn=[0]*101
+        #count community assignments for each community
+        cn=[0]*(q+1)
         for i in c1:
-            relabel1[i]=(c1[i]-1)*(100)+cn[c1[i]]
+            relabel1[i]=(c1[i]-1)*(C)+cn[c1[i]]
             cn[c1[i]]+=1
 
         relabel2={}
-        cn=[0]*101
+        #count community assignments for each community
+        cn=[0]*(q+1)
+        #community assignments
         for i in c2:
-            relabel2[i]=(c2[i]-1)*(100)+cn[c2[i]]
+            relabel2[i]=(c2[i]-1)*(C)+cn[c2[i]]
             cn[c2[i]]+=1
+        #relabel appropriately
+
         g1=nx.relabel_nodes(g1,relabel1)
         g2=nx.relabel_nodes(g2,relabel2)
-
+    #convert to edge list format
     G1={i:set(g1.neighbors(i)) for i in g1.nodes()}
     G2={i:set(g2.neighbors(i)) for i in g2.nodes()}
     return [G1,G2]
